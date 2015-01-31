@@ -1,13 +1,15 @@
 -- Minetest mod acid by Mg
 -- License : GPLv2
 
+acid = {}
 -- Groups
-immediatly 	= {}	-- Chances: 1 ; Interval: 1
-quickly		= {}	-- Chances: 3 ; Interval: 5
-slowly		= {}	-- Chances: 10 ; Interval: 60
-never		= {}	-- Chances: 0 ; Interval: 1
-rarely		= {}	-- Chances: 100; Interval: 2
+acid.immediately = {}	-- Chances: 1 ; Interval: 1
+acid.quickly	 = {}	-- Chances: 3 ; Interval: 5
+acid.slowly		 = {}	-- Chances: 10 ; Interval: 60
+acid.never		 = {}	-- Chances: 0 ; Interval: 0
+acid.rarely		 = {}	-- Chances: 100; Interval: 2
 
+-- Acids
 minetest.register_node("acid:flowing", {
 	description = "Acid flowing",
 	inventory_image = minetest.inventorycube("acid_source.png"),
@@ -66,15 +68,113 @@ minetest.register_node("acid:source", {
 	liquid_alternative_source = "acid:source",
 	liquid_viscosity = 6,
 	liquid_renewable = false,
+})
 
-
--- Acid is stopped by water only
+-- Acid is stopped by water
 minetest.register_abm({
-	nodenames = {"group:acid"},
+	nodenames = {"group:acid","acid:source"},
 	neighbors = {"group:water"},
 	interval = 1,
 	chance = 2,
 	action = function(pos)
 		minetest.remove_node(pos)
+	end,
+})
+
+-- Register functions
+acid.register_immediate = function(itemstring)
+	table.insert(acid.immediately,1,itemstring)
+end
+
+acid.register_quick = function(itemstring)
+	table.insert(acid.quickly,1,itemstring)
+end
+
+acid.register_slow = function(itemstring)
+	table.insert(acid.slowly,1,itemstring)
+end
+
+acid.register_never = function(itemstring)
+	table.insert(acid.never,1,itemstring)
+end
+
+acid.register_rare = function(itemstring)
+	table.insert(acid.rarely,1,itemstring)
+end
+
+acid.found_in_table = function(tablet, itemstring)
+	local i = false
+	for k,v in ipairs(tablet) do
+		if v == itemstring then
+			i = true
+			break
+		end
+	end
+	return i
+end
+
+-- Registrations
+acid.register_immediate("group:snappy")
+acid.register_immediate("group:flowers")
+acid.register_immediate("group:oddly_breakable_by_hand")
+acid.register_immediate("group:crumbly")
+acid.register_quick("group:inflammable")
+acid.register_quick("default:mossycobble")
+acid.register_quick("default:cobble")
+acid.register_quick("group:choppy")
+acid.register_quick("group:stone")
+acid.register_quick("group:cracky")
+acid.register_never("default:cloud")
+acid.register_never("default:glass")
+acid.register_never("default:obsidian_glass")
+
+table.foreach(acid.immediately,print)
+
+-- ABMs
+minetest.register_abm({
+	nodenames = acid.immediately,
+	neighbors = {"group:acid"},
+	interval = 1,
+	chance = 1,
+	action = function(pos)
+		if not acid.found_in_table(acid.never,minetest.get_node(pos).name) then
+			minetest.remove_node(pos)
+		end
+	end,
+})
+
+minetest.register_abm({
+	nodenames = acid.quickly,
+	neighbors = {"group:acid"},
+	interval = 5,
+	chance = 3,
+	action = function(pos)
+		if not acid.found_in_table(acid.never,minetest.get_node(pos).name) then
+			minetest.remove_node(pos)
+		end
+	end,
+})
+
+minetest.register_abm({
+	nodenames = acid.immediately,
+	neighbors = {"group:acid"},
+	interval = 60,
+	chance = 10,
+	action = function(pos)
+		if not acid.found_in_table(acid.never,minetest.get_node(pos).name) then
+			minetest.remove_node(pos)
+		end
+	end,
+})
+
+minetest.register_abm({
+	nodenames = acid.immediately,
+	neighbors = {"group:acid"},
+	interval = 2,
+	chance = 100,
+	action = function(pos)
+		if not acid.found_in_table(acid.never,minetest.get_node(pos).name) then
+			minetest.remove_node(pos)
+		end
 	end,
 })
