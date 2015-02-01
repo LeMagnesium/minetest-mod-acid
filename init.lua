@@ -128,8 +128,6 @@ acid.register_never("default:cloud")
 acid.register_never("default:glass")
 acid.register_never("default:obsidian_glass")
 
-table.foreach(acid.immediately,print)
-
 -- ABMs
 minetest.register_abm({
 	nodenames = acid.immediately,
